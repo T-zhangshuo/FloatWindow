@@ -1,6 +1,5 @@
 # FloatWindow 安卓任意界面悬浮窗
-[![](https://jitpack.io/v/yhaolpz/FloatWindow.svg)](https://jitpack.io/#yhaolpz/FloatWindow)
-
+[![](https://jitpack.io/v/T-zhangshuo/FloatWindow.svg)](https://jitpack.io/#T-zhangshuo/FloatWindow)
 
 ![悬浮按钮图](https://raw.githubusercontent.com/yhaolpz/FixedFloatWindow/master/slide.gif)
 
@@ -41,7 +40,7 @@
 
 ```
 	dependencies {
-	        compile 'com.github.yhaolpz:FloatWindow:1.0.9'
+	        compile 'com.github.T-zhangshuo:FloatWindow:1.1.0'
 	}
 ```
 
@@ -67,6 +66,7 @@
               .setHeight(Screen.width,0.2f)
               .setX(100)                                   //设置控件初始位置
               .setY(Screen.height,0.3f)
+              .setAuto(true)                               //是否自动管理显示和隐藏
               .setDesktopShow(true)                        //桌面显示
               .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
               .setPermissionListener(mPermissionListener)  //监听权限申请结果
@@ -102,20 +102,22 @@
 **3.可拖动悬浮窗及回弹动画**
 
 ```java
-              .setMoveType(MoveType.slide)
+              .setMoveType(MoveType.SLIDE)
               .setMoveStyle(500, new AccelerateInterpolator())  //贴边动画时长为500ms，加速插值器
 
 ```
 
 共提供 4 种 MoveType :
 
-MoveType.slide       : 可拖动，释放后自动贴边 （默认）
+MoveType.SLIDE       : 可拖动，释放后自动贴边 （默认）
 
-MoveType.back        : 可拖动，释放后自动回到原位置
+MoveType.BACK        : 可拖动，释放后自动回到原位置
 
-MoveType.active      : 可拖动
+MoveType.ACTIVE      : 可拖动
 
-MoveType.inactive    : 不可拖动
+MoveType.INACTIVE    : 不可拖动
+
+MoveType.FIXED       : 不可移动不可点击
 
 
 setMoveStyle 方法可设置动画效果，只在 MoveType.slide 或 MoveType.back 模式下设置此项才有意义。默认减速插值器，默认动画时长为 300ms。
@@ -179,6 +181,11 @@ setMoveStyle 方法可设置动画效果，只在 MoveType.slide 或 MoveType.ba
 
 **更新日志**
 --
+**v1.1.0**
+ 增加 管理 是否需要自动显示和隐藏
+ 添加旋转时，悬浮窗位置。
+ 修正代码结构
+ 删除按比例设置位置（可以通过屏幕直接计算）
 
 **v1.0.9**
 
