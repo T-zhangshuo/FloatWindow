@@ -1,7 +1,6 @@
 package com.example.yhao.floatwindow;
 
 import android.app.Application;
-import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
@@ -10,10 +9,10 @@ import android.widget.Toast;
 
 import com.example.yhao.fixedfloatwindow.R;
 import com.yhao.floatwindow.FloatWindow;
-import com.yhao.floatwindow.MoveType;
-import com.yhao.floatwindow.PermissionListener;
-import com.yhao.floatwindow.Screen;
-import com.yhao.floatwindow.ViewStateListener;
+import com.yhao.floatwindow.annotation.MoveType;
+import com.yhao.floatwindow.interfaces.ViewStateListener;
+import com.yhao.floatwindow.permission.PermissionListener;
+import com.yhao.floatwindow.utils.ScreenUtils;
 
 /**
  * Created by yhao on 2017/12/18.
@@ -31,15 +30,17 @@ public class BaseApplication extends Application {
 
         ImageView imageView = new ImageView(getApplicationContext());
         imageView.setImageResource(R.drawable.icon);
-
+        int screenWidth = ScreenUtils.getScreenWidth(this);
+        int screenHeight = ScreenUtils.getScreenHeight(this);
         FloatWindow
                 .with(getApplicationContext())
                 .setView(imageView)
-                .setWidth(Screen.width, 0.2f) //设置悬浮控件宽高
-                .setHeight(Screen.width, 0.2f)
-                .setX(Screen.width, 0.8f)
-                .setY(Screen.height, 0.3f)
-                .setMoveType(MoveType.slide,100,-100)
+                .setWidth((int) (screenWidth * 0.2f)) //设置悬浮控件宽高
+                .setHeight((int) (screenWidth * 0.2f))
+                .setX((int)(screenWidth*0.8f))
+                .setY((int)(screenHeight*0.2f))
+                .setAuto(true)//是否自动根据生命周期管理
+                .setMoveType(MoveType.SLIDE, 100, -100)
                 .setMoveStyle(500, new BounceInterpolator())
                 .setFilter(true, A_Activity.class, C_Activity.class)
                 .setViewStateListener(mViewStateListener)

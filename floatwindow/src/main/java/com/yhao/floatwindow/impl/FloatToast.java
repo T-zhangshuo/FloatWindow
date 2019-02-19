@@ -1,20 +1,18 @@
-package com.yhao.floatwindow;
+package com.yhao.floatwindow.impl;
 
 import android.content.Context;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.yhao.floatwindow.interfaces.BaseFloat;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-/**
- * 自定义 toast 方式，无需申请权限
- * 当前版本暂时用 TYPE_TOAST 代替，后续版本可能会再融入此方式
- */
 
-class FloatToast extends FloatView {
 
+public class FloatToast extends BaseFloat {
 
     private Toast toast;
 
@@ -25,11 +23,9 @@ class FloatToast extends FloatView {
     private int mWidth;
     private int mHeight;
 
-
-    FloatToast(Context applicationContext) {
+    public FloatToast(Context applicationContext) {
         toast = new Toast(applicationContext);
     }
-
 
     @Override
     public void setSize(int width, int height) {
@@ -66,7 +62,6 @@ class FloatToast extends FloatView {
         }
     }
 
-
     private void initTN() {
         try {
             Field tnField = toast.getClass().getDeclaredField("mTN");
@@ -76,9 +71,9 @@ class FloatToast extends FloatView {
             hide = mTN.getClass().getMethod("hide");
             Field tnParamsField = mTN.getClass().getDeclaredField("mParams");
             tnParamsField.setAccessible(true);
-            WindowManager.LayoutParams params = (WindowManager.LayoutParams) tnParamsField.get(mTN);
-            params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            WindowManager.LayoutParams params = (WindowManager.LayoutParams)tnParamsField.get(mTN);
+            params.flags =
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             params.width = mWidth;
             params.height = mHeight;
             params.windowAnimations = 0;
@@ -90,6 +85,5 @@ class FloatToast extends FloatView {
             e.printStackTrace();
         }
     }
-
 
 }

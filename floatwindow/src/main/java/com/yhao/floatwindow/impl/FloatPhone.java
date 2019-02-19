@@ -1,4 +1,4 @@
-package com.yhao.floatwindow;
+package com.yhao.floatwindow.impl;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -6,13 +6,14 @@ import android.os.Build;
 import android.view.View;
 import android.view.WindowManager;
 
-/**
- * Created by yhao on 17-11-14.
- * https://github.com/yhaolpz
- */
+import com.yhao.floatwindow.FloatActivity;
+import com.yhao.floatwindow.interfaces.BaseFloat;
+import com.yhao.floatwindow.permission.PermissionListener;
+import com.yhao.floatwindow.utils.LogUtils;
+import com.yhao.floatwindow.utils.Miui;
 
-class FloatPhone extends FloatView {
 
+public class FloatPhone extends BaseFloat {
     private final Context mContext;
 
     private final WindowManager mWindowManager;
@@ -22,15 +23,14 @@ class FloatPhone extends FloatView {
     private boolean isRemove = false;
     private PermissionListener mPermissionListener;
 
-    FloatPhone(Context applicationContext, PermissionListener permissionListener) {
+    public FloatPhone(Context applicationContext, PermissionListener permissionListener) {
         mContext = applicationContext;
         mPermissionListener = permissionListener;
         mWindowManager = (WindowManager) applicationContext.getSystemService(Context.WINDOW_SERVICE);
         mLayoutParams = new WindowManager.LayoutParams();
         mLayoutParams.format = PixelFormat.RGBA_8888;
         mLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         mLayoutParams.windowAnimations = 0;
     }
 
@@ -52,17 +52,16 @@ class FloatPhone extends FloatView {
         mLayoutParams.y = mY = yOffset;
     }
 
-
     @Override
     public void init() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+        if (Build.VERSION.SDK_INT >= 25) {
             req();
         } else if (Miui.rom()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= 23) {
                 req();
             } else {
                 mLayoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-                Miui.req(mContext, new PermissionListener() {
+                Miui.requestPermission(mContext, new PermissionListener() {
                     @Override
                     public void onSuccess() {
                         mWindowManager.addView(mView, mLayoutParams);
@@ -85,15 +84,17 @@ class FloatPhone extends FloatView {
                 mWindowManager.addView(mView, mLayoutParams);
             } catch (Exception e) {
                 mWindowManager.removeView(mView);
-                LogUtil.e("TYPE_TOAST 失败");
+                LogUtils.e("TYPE_TOAST 失败");
                 req();
             }
         }
     }
 
     private void req() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // mLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        if (Build.VERSION.SDK_INT >= 26) {
+            mLayoutParams.type = 2038;
         } else {
             mLayoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
@@ -123,35 +124,40 @@ class FloatPhone extends FloatView {
 
     @Override
     public void updateXY(int x, int y) {
-        if (isRemove) return;
+        if (isRemove) {
+            return;
+        }
         mLayoutParams.x = mX = x;
         mLayoutParams.y = mY = y;
         mWindowManager.updateViewLayout(mView, mLayoutParams);
     }
 
     @Override
-    void updateX(int x) {
-        if (isRemove) return;
+    public void updateX(int x) {
+        if (isRemove) {
+            return;
+        }
         mLayoutParams.x = mX = x;
         mWindowManager.updateViewLayout(mView, mLayoutParams);
     }
 
     @Override
-    void updateY(int y) {
-        if (isRemove) return;
+    public void updateY(int y) {
+        if (isRemove) {
+            return;
+        }
         mLayoutParams.y = mY = y;
         mWindowManager.updateViewLayout(mView, mLayoutParams);
     }
 
     @Override
-    int getX() {
+    public int getX() {
         return mX;
     }
 
     @Override
-    int getY() {
+    public int getY() {
         return mY;
     }
-
 
 }

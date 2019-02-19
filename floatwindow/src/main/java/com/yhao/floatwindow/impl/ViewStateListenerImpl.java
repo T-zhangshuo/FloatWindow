@@ -1,10 +1,9 @@
-package com.yhao.floatwindow;
+package com.yhao.floatwindow.impl;
 
-/**
- * Created by yhao on 2018/5/5.
- * https://github.com/yhaolpz
- */
-public class ViewStateListenerAdapter implements ViewStateListener{
+
+import com.yhao.floatwindow.interfaces.ViewStateListener;
+
+public class ViewStateListenerImpl implements ViewStateListener {
     @Override
     public void onPositionUpdate(int x, int y) {
 

@@ -1,4 +1,4 @@
-package com.yhao.floatwindow;
+package com.yhao.floatwindow.impl;
 
 import android.app.Activity;
 import android.app.Application;
@@ -7,42 +7,62 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.widget.Toast;
+import android.view.OrientationEventListener;
 
-/**
- * Created by yhao on 17-12-1.
- * 用于控制悬浮窗显示周期
- * 使用了三种方法针对返回桌面时隐藏悬浮按钮
- * 1.startCount计数，针对back到桌面可以及时隐藏
- * 2.监听home键，从而及时隐藏
- * 3.resumeCount计时，针对一些只执行onPause不执行onStop的奇葩情况
- */
+import com.yhao.floatwindow.interfaces.LifecycleListener;
+import com.yhao.floatwindow.interfaces.ResumedListener;
 
-class FloatLifecycle extends BroadcastReceiver implements Application.ActivityLifecycleCallbacks {
+
+public class FloatLifecycleReceiver extends BroadcastReceiver implements Application.ActivityLifecycleCallbacks {
 
     private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     private static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
-    private static final long delay = 300;
-    private Handler mHandler;
-    private Class[] activities;
-    private boolean showFlag;
-    private int startCount;
-    private int resumeCount;
-    private boolean appBackground;
-    private LifecycleListener mLifecycleListener;
     private static ResumedListener sResumedListener;
     private static int num = 0;
+    private Class<?>[] activities;
+    private boolean showFlag;
+    private int startCount;
+    private boolean appBackground;
+    private LifecycleListener mLifecycleListener;
+    private int mRotation = 0;
+    private OrientationEventListener orientationEventListener;
 
-
-    FloatLifecycle(Context applicationContext, boolean showFlag, Class[] activities, LifecycleListener lifecycleListener) {
+    public FloatLifecycleReceiver(Context applicationContext, boolean showFlag, Class<?>[] activities,
+                                  LifecycleListener lifecycleListener) {
         this.showFlag = showFlag;
         this.activities = activities;
         num++;
         mLifecycleListener = lifecycleListener;
-        mHandler = new Handler();
         ((Application) applicationContext).registerActivityLifecycleCallbacks(this);
+//        TODO 如果是其他地方打开，该startCount最好设置其值
+//        startCount = 1;
         applicationContext.registerReceiver(this, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        startOrientationListener(applicationContext);
+
+    }
+
+    private void startOrientationListener(Context context) {
+        orientationEventListener = new OrientationEventListener(context) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+                if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) return;
+                int rotation = mRotation;
+                if (orientation > 355 || orientation < 5) {
+                    rotation = 0;
+                } else if (orientation > 85 && orientation < 95) {
+                    rotation = 90;
+                } else if (orientation > 175 && orientation < 185) {
+                    rotation = 180;
+                } else if (orientation > 265 && orientation < 275) {
+                    rotation = 270;
+                }
+                if (mRotation != rotation) {
+                    mLifecycleListener.OrientationChange(mRotation, rotation);
+                    mRotation = rotation;
+                }
+            }
+        };
+        orientationEventListener.enable();
     }
 
     public static void setResumedListener(ResumedListener resumedListener) {
@@ -53,14 +73,13 @@ class FloatLifecycle extends BroadcastReceiver implements Application.ActivityLi
         if (activities == null) {
             return true;
         }
-        for (Class a : activities) {
+        for (Class<?> a : activities) {
             if (a.isInstance(activity)) {
                 return showFlag;
             }
         }
         return !showFlag;
     }
-
 
     @Override
     public void onActivityResumed(Activity activity) {
@@ -71,7 +90,6 @@ class FloatLifecycle extends BroadcastReceiver implements Application.ActivityLi
                 sResumedListener = null;
             }
         }
-        resumeCount++;
         if (needShow(activity)) {
             mLifecycleListener.onShow();
         } else {
@@ -84,16 +102,6 @@ class FloatLifecycle extends BroadcastReceiver implements Application.ActivityLi
 
     @Override
     public void onActivityPaused(final Activity activity) {
-        resumeCount--;
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (resumeCount == 0) {
-                    appBackground = true;
-                    mLifecycleListener.onBackToDesktop();
-                }
-            }
-        }, delay);
 
     }
 
@@ -101,7 +109,6 @@ class FloatLifecycle extends BroadcastReceiver implements Application.ActivityLi
     public void onActivityStarted(Activity activity) {
         startCount++;
     }
-
 
     @Override
     public void onActivityStopped(Activity activity) {
@@ -122,12 +129,10 @@ class FloatLifecycle extends BroadcastReceiver implements Application.ActivityLi
         }
     }
 
-
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
 
     }
-
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
@@ -139,5 +144,10 @@ class FloatLifecycle extends BroadcastReceiver implements Application.ActivityLi
 
     }
 
-
+    public void unRegisterReceiver(Context context) {
+        ((Application) context).unregisterActivityLifecycleCallbacks(this);
+        context.unregisterReceiver(this);
+        if (orientationEventListener != null)
+            orientationEventListener.disable();
+    }
 }

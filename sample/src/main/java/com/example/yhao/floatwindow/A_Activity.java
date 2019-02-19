@@ -10,8 +10,6 @@ import android.widget.Toast;
 
 import com.example.yhao.fixedfloatwindow.R;
 import com.yhao.floatwindow.FloatWindow;
-import com.yhao.floatwindow.MoveType;
-import com.yhao.floatwindow.Screen;
 
 public class A_Activity extends AppCompatActivity {
 
