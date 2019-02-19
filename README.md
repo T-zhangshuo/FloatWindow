@@ -174,9 +174,7 @@ setMoveStyle 方法可设置动画效果，只在 MoveType.slide 或 MoveType.ba
 
 最后：
 --
-![悬浮按钮图](https://raw.githubusercontent.com/yhaolpz/FixedFloatWindow/master/pay.jpg)
-
-本人已尽量去兼容更多机型，但经济有限，如果你想帮助此库，提 Issues 标出当前版本不适配的机型即可，感谢~
+该项目根据已有的项目进行后续维护。
 
 
 **更新日志**
